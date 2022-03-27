@@ -26,7 +26,7 @@
       </router-link>
     </li>
     <li class="nav-item">
-      <router-link to="/paket" class="nav-link" href="index.html">
+      <router-link to="/barang" class="nav-link" href="index.html">
         <i class="fas fa-box"></i>
         <span>Barang</span>
       </router-link>
