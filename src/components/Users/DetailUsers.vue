@@ -25,11 +25,21 @@
                           text-primary text-uppercase
                         "
                       >
-                        Nama
+                        Username
                       </div>
-                      <div class="h6 mb-0 font-weight-bold text-gray-800 mb-2">
-                        {{ users.nama }}
+                      <div
+                        v-if="level == 'admin' || level == 'petugas'"
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ petugas.username }}
                       </div>
+                      <div
+                        v-else
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ masyarakat.username }}
+                      </div>
+
                       <div
                         class="
                           text-xs
@@ -37,11 +47,37 @@
                           text-primary text-uppercase
                         "
                       >
-                        Jenis Kelamin
+                        Nama
                       </div>
-                      <div class="h6 mb-0 font-weight-bold text-gray-800 mb-2">
-                        {{ users.jenis_kelamin }}
+                      <div
+                        v-if="level == 'admin' || level == 'petugas'"
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ petugas.nama_petugas }}
                       </div>
+                      <div
+                        v-else
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ masyarakat.nama_masyarakat }}
+                      </div>
+                      <div v-if="level == 'admin' || level == 'petugas'">
+                        <div
+                          class="
+                            text-xs
+                            font-weight-bold
+                            text-primary text-uppercase
+                          "
+                        >
+                          Jenis Kelamin
+                        </div>
+                        <div
+                          class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                        >
+                          {{ petugas.jenis_kelamin }}
+                        </div>
+                      </div>
+
                       <div
                         class="
                           text-xs
@@ -51,8 +87,17 @@
                       >
                         Alamat
                       </div>
-                      <div class="h6 mb-0 font-weight-bold text-gray-800 mb-2">
-                        {{ users.alamat }}
+                      <div
+                        v-if="level == 'admin' || level == 'petugas'"
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ petugas.alamat }}
+                      </div>
+                      <div
+                        v-else
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ masyarakat.alamat_masyarakat }}
                       </div>
                       <div
                         class="
@@ -63,12 +108,46 @@
                       >
                         No. Telephone
                       </div>
-                      <div class="h6 mb-0 font-weight-bold text-gray-800 mb-2">
-                        {{ users.telephone }}
+                      <div
+                        v-if="level == 'admin' || level == 'petugas'"
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ petugas.tlp_petugas }}
+                      </div>
+                      <div
+                        v-else
+                        class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                      >
+                        {{ masyarakat.tlp_masyarakat }}
+                      </div>
+                      <div v-if="level == 'admin' || level == 'petugas'">
+                        <div
+                          class="
+                            text-xs
+                            font-weight-bold
+                            text-primary text-uppercase
+                          "
+                        >
+                          Level
+                        </div>
+                        <div
+                          class="h6 mb-0 font-weight-bold text-gray-800 mb-2"
+                        >
+                          {{ petugas.level }}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+                <router-link
+                  v-if="level == 'masyarakat'"
+                  class="btn btn-info btn-icon-split"
+                  :to="{
+                    name: 'tambahdetailm',
+                    params: { id: this.$route.params.id },
+                  }"
+                  >Edit Detail</router-link
+                >
               </div>
             </div>
           </div>
@@ -83,16 +162,32 @@
 export default {
   data() {
     return {
-      users: {},
+      masyarakat: {},
+      petugas: {},
+      level: {},
     };
   },
   created() {
+    var data = JSON.parse(this.$store.state.datauser);
+    this.level = data.level;
+
     this.axios
       .get(
-        `http://localhost/lelangOn/public/api/user/show/${this.$route.params.id}`
+        `http://localhost/lelangOn/public/api/user/allid/petugas/${this.$route.params.id}`
       )
       .then((res) => {
-        this.users = res.data;
+        console.log(res.data);
+        this.petugas = res.data;
+      })
+      .catch((err) => console.log(err));
+
+    this.axios
+      .get(
+        `http://localhost/lelangOn/public/api/user/allid/masyarakat/${this.$route.params.id}`
+      )
+      .then((res) => {
+        console.log(res.data);
+        this.masyarakat = res.data;
       })
       .catch((err) => console.log(err));
   },

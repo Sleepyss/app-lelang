@@ -90,20 +90,25 @@ export default {
   data() {
     return {
       transaksi: {},
+      id_masyarakat: {},
     };
   },
   created() {
     var data = JSON.parse(this.$store.state.datauser);
+    this.id_masyarakat = data.id_masyarakat;
 
     var level = data.level;
 
-    if (level == "masyarakat") {
+    if (level == "petugas" || level == "admin") {
       this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
-      this.$router.push("/dashboard");
+      this.$router.push("/");
     }
 
     this.axios
-      .get("http://localhost/lelangOn/public/api/transaksi")
+      .get(
+        `http://localhost/lelangOn/public/api/transaksi/joinonly/` +
+          this.id_masyarakat
+      )
       .then((res) => {
         this.transaksi = res.data.data;
       })

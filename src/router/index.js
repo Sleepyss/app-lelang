@@ -1,14 +1,21 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+import store from '../store/index.js'
+
 import Login from '../components/LoginP.vue'
 import Dashboard from '../components/DashboardP.vue'
+import DashboardM from '../components/Masyarakat/DashboardMP.vue'
+
+// Admin & Petugas
 
 // Users
 import IndexUser from '../components/Users/IndexUsers.vue'
 import TambahUser from '../components/Users/TambahUsers.vue'
 import EditUser from '../components/Users/EditUsers.vue'
 import DetailUser from '../components/Users/DetailUsers.vue'
+import TambahDetailUser from '../components/Users/TambahDetailUser.vue'
+
 
 // Barang
 import IndexBarang from '../components/Barang/IndexBarang.vue'
@@ -27,6 +34,16 @@ import IndexTransaksi from '../components/Transaksi/IndexTransaksi.vue'
 import TambahTransaksi from '../components/Transaksi/TambahTransaksi.vue'
 import DetailTransaksi from '../components/Transaksi/DetailTransaksi.vue'
 
+// Report
+import ReportTransaksi from '../components/Report/IndexReport.vue'
+
+// Masyarakat
+import TambahDetailM from '../components/Masyarakat/TambahDetailM.vue'
+import RegisterMasyarakat from '../components/Masyarakat/RegisterM.vue'
+
+// Masyarakat - Lelang
+import DetailLelangM from '../components/Masyarakat/Lelang/DetailLelangM.vue'
+import IndexTransaksiM from '../components/Masyarakat/Transaksi/IndexTransaksiM.vue'
 
 Vue.use(VueRouter)
 
@@ -40,7 +57,15 @@ const routes = [{
         name: 'dashboard',
         component: Dashboard,
         meta: {
-            requireAuth: true
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/dashboard',
+        name: 'dashboardmasyarakat',
+        component: DashboardM,
+        meta: {
+            requiresAuth: true
         }
     },
 
@@ -51,7 +76,7 @@ const routes = [{
         name: 'indexuser',
         component: IndexUser,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
@@ -59,7 +84,7 @@ const routes = [{
         name: 'tambahuser',
         component: TambahUser,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
@@ -67,15 +92,23 @@ const routes = [{
         name: 'edituser',
         component: EditUser,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
-        path: '/users/:id',
+        path: '/users/detail/:id',
         name: 'detailuser',
         component: DetailUser,
         meta: {
-            requireAuth: true
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/users/tambah/detail/:id',
+        name: 'tambahdetailuser',
+        component: TambahDetailUser,
+        meta: {
+            requiresAuth: true
         }
     },
 
@@ -86,7 +119,7 @@ const routes = [{
         name: 'indexbarang',
         component: IndexBarang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
@@ -94,7 +127,7 @@ const routes = [{
         name: 'tambahbarang',
         component: TambahBarang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
@@ -102,7 +135,7 @@ const routes = [{
         name: 'editbarang',
         component: EditBarang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
@@ -110,7 +143,7 @@ const routes = [{
         name: 'detailbarang',
         component: DetailBarang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
 
@@ -121,7 +154,7 @@ const routes = [{
         name: 'indexlelang',
         component: IndexLelang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
@@ -129,23 +162,23 @@ const routes = [{
         name: 'tambahlelang',
         component: TambahLelang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
-        path: '/lelang/:id',
+        path: '/lelang/edit/:id',
         name: 'editlelang',
         component: EditLelang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
-        path: '/lelang/:id',
+        path: '/lelang/detail/:id',
         name: 'detaillelang',
         component: DetailLelang,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
 
@@ -156,11 +189,11 @@ const routes = [{
         name: 'indextransaksi',
         component: IndexTransaksi,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
     {
-        path: '/transaksi/tambah',
+        path: '/transaksi/tambah/:id',
         name: 'tambahtransaksi',
         component: TambahTransaksi,
         meta: {
@@ -172,9 +205,51 @@ const routes = [{
         name: 'detailtransaksi',
         component: DetailTransaksi,
         meta: {
-            requireAuth: true
+            requiresAuth: true
         }
     },
+
+    // Report
+    {
+        path: '/report',
+        name: 'reporttransaksi',
+        component: ReportTransaksi,
+        meta: {
+            requiresAuth: true
+        }
+    },
+
+    // Masyarakat - Lelang
+    {
+        path: '/detail/:id',
+        name: 'detaillelangm',
+        component: DetailLelangM,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/register',
+        name: 'registermasyarakat',
+        component: RegisterMasyarakat,
+    },
+    {
+        path: '/tambah/detail/:id',
+        name: 'tambahdetailm',
+        component: TambahDetailM,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
+        path: '/transaksim',
+        name: 'indextransaksim',
+        component: IndexTransaksiM,
+        meta: {
+            requiresAuth: true
+        }
+    },
+
 ]
 
 const router = new VueRouter({
@@ -184,8 +259,8 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    if (to.matched.some((record) => record.meta.requiresAuth)) {
-        if (localStorage.getItem('auth')) {
+    if (to.meta.requiresAuth) {
+        if (store.state.token) {
             next()
         } else {
             next('/login')

@@ -9,26 +9,34 @@
             <div class="col-lg-8">
               <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">
-                  Edit Data Member
+                  Update Detail Petugas
                 </h6>
               </div>
               <div class="card-body">
-                <form @submit.prevent="edit">
+                <form @submit.prevent="submit">
                   <div class="form-group">
                     <label>Nama</label>
                     <input
                       type="text"
                       class="form-control"
-                      v-model="users.nama"
+                      v-model="users.nama_petugas"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Telephone</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      v-model="users.tlp_petugas"
                     />
                   </div>
                   <div class="form-group">
                     <label>Alamat</label>
-                    <textarea
-                      rows="4"
+                    <input
+                      type="text"
                       class="form-control"
                       v-model="users.alamat"
-                    ></textarea>
+                    />
                   </div>
                   <div class="form-group">
                     <div>
@@ -38,37 +46,15 @@
                       class="btn-group btn-group-toggle"
                       data-toggle="buttons"
                     >
-                      <label
-                        v-if="users.jenis_kelamin == 'L'"
-                        class="btn btn-secondary active"
-                      >
+                      <label class="btn btn-secondary">
                         <input
                           type="radio"
                           value="L"
                           v-model="users.jenis_kelamin"
                         />
-                        Laki-laki
+                        Laki - Laki
                       </label>
-                      <label v-else class="btn btn-secondary">
-                        <input
-                          type="radio"
-                          value="L"
-                          v-model="users.jenis_kelamin"
-                        />
-                        Laki-laki
-                      </label>
-                      <label
-                        v-if="users.jenis_kelamin == 'P'"
-                        class="btn btn-secondary active"
-                      >
-                        <input
-                          type="radio"
-                          value="P"
-                          v-model="users.jenis_kelamin"
-                        />
-                        Perempuan
-                      </label>
-                      <label v-else class="btn btn-secondary">
+                      <label class="btn btn-secondary">
                         <input
                           type="radio"
                           value="P"
@@ -77,14 +63,6 @@
                         Perempuan
                       </label>
                     </div>
-                  </div>
-                  <div class="form-group">
-                    <label>Nomor Telepon</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      v-model="users.telephone"
-                    />
                   </div>
                   <button type="submit" class="btn btn-success btn-block">
                     Simpan
@@ -104,19 +82,22 @@
 export default {
   data() {
     return {
+      id_petugas: {
+        id_petugas: "",
+      },
       users: {},
+      id: {},
     };
   },
   created() {
-    var data = JSON.parse(this.$store.datauser);
-    var level = data.level;
+    var data = JSON.parse(this.$store.state.datauser);
 
-    if (level == "petugas") {
+    var level = data.level;
+    console.log(this.id);
+
+    if (level == "masyarakat") {
       this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
       this.$router.push("/");
-    } else if (level == "masyarakat") {
-      this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
-      this.$router.push("/dashboard");
     }
 
     this.axios
@@ -124,18 +105,44 @@ export default {
         `http://localhost/lelangOn/public/api/user/show/${this.$route.params.id}`
       )
       .then((res) => {
-        this.users = res.data;
-      });
+        this.axios
+          .get(
+            `http://localhost/lelangOn/public/api/petugas/${res.data.id_petugas}`
+          )
+          .then((res) => {
+            this.users = res.data;
+          })
+          .catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
   },
   methods: {
-    edit() {
+    submit() {
       this.axios
-        .put(
-          `http://localhost/lelangOn/public/api/user/update/${this.$route.params.id}`,
-          this.users
-        )
+        .post(`http://localhost/lelangOn/public/api/petugas/store`, this.users)
         .then(() => {
-          this.$router.push("/user");
+          this.axios
+            .get(
+              `http://localhost/lelangOn/public/api/petugas/maxid/${this.$route.params.id}`
+            )
+            .then((res) => {
+              this.id_petugas.id_petugas = res.data;
+              this.axios
+                .put(
+                  `http://localhost/lelangOn/public/api/user/update/petugas/${this.$route.params.id}`,
+                  this.id_petugas
+                )
+                .then(() => {
+                  this.$swal(
+                    "Success",
+                    "Penambahan Detail Berhasil ",
+                    "success"
+                  );
+                  this.$router.push("/users/detail/" + this.$route.params.id);
+                })
+                .catch((err) => console.log(err));
+            })
+            .catch((err) => console.log(err));
         })
         .catch((err) => console.log(err));
     },

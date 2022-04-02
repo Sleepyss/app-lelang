@@ -29,10 +29,6 @@
                       <thead>
                         <tr>
                           <th>#</th>
-                          <th>Nama</th>
-                          <th>Alamat</th>
-                          <th>Jenis Kelamin</th>
-                          <th>Nomor Telephone</th>
                           <th>Username</th>
                           <th>Level</th>
                           <th>Aksi</th>
@@ -41,10 +37,6 @@
                       <tbody>
                         <tr v-for="(u, index) in users" :key="index">
                           <td>{{ index + 1 }}</td>
-                          <td>{{ u.nama }}</td>
-                          <td>{{ u.alamat }}</td>
-                          <td>{{ u.jenis_kelamin }}</td>
-                          <td>{{ u.telephone }}</td>
                           <td>{{ u.username }}</td>
                           <td>{{ u.level }}</td>
                           <td>
@@ -55,7 +47,10 @@
                               <i class="far fa-eye"></i>
                             </router-link>
                             <router-link
-                              :to="{ name: 'edituser', params: { id: u.id } }"
+                              :to="{
+                                name: 'tambahdetailuser',
+                                params: { id: u.id },
+                              }"
                               class="btn btn-warning btn-circle"
                             >
                               <i class="fas fa-pen"></i>
@@ -92,17 +87,48 @@ export default {
     };
   },
   created() {
-    this.axios.get("http://localhost/lelangOn/public/api/user").then((res) => {
-      this.users = res.data;
-    });
+    var data = JSON.parse(this.$store.state.datauser);
+    var level = data.level;
+
+    if (level == "petugas") {
+      this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
+      this.$router.push("/");
+    } else if (level == "masyarakat") {
+      this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
+      this.$router.push("/dashboard");
+    }
+
+    this.axios
+      .get("http://localhost/lelangOn/public/api/user/petugas")
+      .then((res) => {
+        this.users = res.data.data;
+      });
   },
   methods: {
     hapus(id) {
-      this.axios
-        .delete(`http://localhost/lelangOn/public/api/user/delete/${id}`)
-        .then(() => {
-          let i = this.users.map((item) => item.id).indexOf(id);
-          this.users.splice(i, 1);
+      this.$swal
+        .fire({
+          title: "Anda yakin ingin menghapus?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Ya",
+          cancelButtonText: "Batal",
+        })
+        .then((res) => {
+          if (res.value) {
+            this.axios
+              .delete(`http://localhost/lelangOn/public/api/user/delete/${id}`)
+              .then((res) => {
+                if (res.data.success) {
+                  let i = this.users.map((item) => item.id).indexOf(id);
+                  this.users.splice(i, 1);
+                  this.$swal("Sukses", res.data.message, "success");
+                }
+              })
+              .catch((err) => console.log(err));
+          }
         });
     },
   },

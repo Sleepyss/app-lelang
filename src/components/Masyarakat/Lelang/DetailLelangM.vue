@@ -87,16 +87,7 @@
                           >
                             Status
                           </div>
-                          <div
-                            v-if="lelang.status == 'berlangsung'"
-                            class="badge bg-success text-light"
-                          >
-                            {{ lelang.status }}
-                          </div>
-                          <div
-                            v-if="lelang.status == 'berhenti'"
-                            class="badge bg-danger text-light"
-                          >
+                          <div class="badge bg-success text-light">
                             {{ lelang.status }}
                           </div>
                         </div>
@@ -162,19 +153,52 @@
                       </tr>
                     </tbody>
                   </table>
-                  <button
-                    type="submit"
-                    class="btn btn-success mr-3"
-                    @click="ubahStatus"
-                  >
-                    Tutup Lelang
-                  </button>
-                  <router-link
-                    class="btn btn-primary"
-                    v-if="lelang.status != 'berlangsung'"
-                    :to="{ name: 'tambahtransaksi', params: { id: id_lelang } }"
-                    >Tambah Transaksi</router-link
-                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <form @submit.prevent="tambah">
+                    <div class="form-group">
+                      <label>Harga</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Masukkan Harga.."
+                        v-model="historystore.penawaran_harga"
+                      />
+                    </div>
+                    <!-- <div class="form-group">
+                      <label>Lelang</label>
+                      <select v-model="historystore.id_lelang">
+                        <option :value="lelang.id_lelang">
+                          {{ lelang.id_lelang }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Barang</label>
+                      <select v-model="historystore.id_barang">
+                        <option :value="lelang.id_barang">
+                          {{ lelang.id_barang }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Masyarakat</label>
+                      <select v-model="historystore.id_masyarakat">
+                        <option :value="lelang.id_masyarakat">
+                          {{ lelang.id_masyarakat }}
+                        </option>
+                      </select>
+                    </div> -->
+                    <button type="submit" class="btn btn-success btn-block">
+                      Simpan
+                    </button>
+                  </form>
                 </div>
               </div>
             </div>
@@ -190,10 +214,15 @@
 export default {
   data() {
     return {
-      id_lelang: this.$route.params.id,
       lelang: {},
       history: {},
+      historystore: {
+        id_masyarakat: "",
+        id_lelang: "",
+        id_barang: "",
+      },
       maxhistory: {
+        id_masyarakat: "",
         harga_akhir: "",
       },
     };
@@ -201,14 +230,14 @@ export default {
   computed: {},
   created() {
     var data = JSON.parse(this.$store.state.datauser);
+    this.historystore.id_masyarakat = data.id_masyarakat;
+    this.maxhistory.id_masyarakat = data.id_masyarakat;
+
     var level = data.level;
 
-    if (level == "admin") {
+    if (level == "petugas" || level == "admin") {
       this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
       this.$router.push("/");
-    } else if (level == "masyarakat") {
-      this.$swal("Error", "Anda tidak dapat mengakses halam ini", "error");
-      this.$router.push("/dashboard");
     }
 
     this.axios
@@ -216,7 +245,10 @@ export default {
         `http://localhost/lelangOn/public/api/lelang/${this.$route.params.id}`
       )
       .then((res) => {
+        console.log(res.data);
         this.lelang = res.data;
+        this.historystore.id_lelang = res.data.id_lelang;
+        this.historystore.id_barang = res.data.id_barang;
       })
       .catch((err) => console.log(err));
 
@@ -228,38 +260,42 @@ export default {
         this.history = res.data;
       })
       .catch((err) => console.log(err));
-
-    this.axios
-      .get(
-        `http://localhost/lelangOn/public/api/hlelang/max/${this.$route.params.id}`
-      )
-      .then((res) => {
-        console.log(res.data);
-        this.maxhistory.harga_akhir = res.data;
-      })
-      .catch((err) => console.log(err));
-
-    // this.axios
-    //   .put(
-    //     `http://localhost/lelangOn/public/api/lelang/hargamasyarakat/${this.$route.params.id}`,
-    //     this.maxhistory
-    //   )
-    //   .then(() => {
-    //     this.$route.go();
-    //   })
-    //   .catch((err) => console.log(err));
   },
   methods: {
-    ubahStatus() {
-      if (this.lelang.status == "berlangsung") {
+    tambah() {
+      if (this.historystore.penawaran_harga > this.lelang.harga_akhir) {
         this.axios
-          .put(
-            `http://localhost/lelangOn/public/api/lelang/status/${this.$route.params.id}`
+          .post(
+            "http://localhost/lelangOn/public/api/hlelang/store",
+            this.historystore
           )
           .then(() => {
-            this.$router.go();
+            this.axios
+              .get(
+                `http://localhost/lelangOn/public/api/hlelang/max/${this.$route.params.id}`
+              )
+              .then((res) => {
+                this.maxhistory.harga_akhir = res.data;
+                this.axios
+                  .put(
+                    `http://localhost/lelangOn/public/api/lelang/update/hargamasyarakat/${this.$route.params.id}`,
+                    this.maxhistory
+                  )
+                  .then((res) => {
+                    this.$swal("Success", res.data.message, "success");
+                    this.$router.go();
+                  })
+                  .catch((err) => console.log(err));
+              })
+              .catch((err) => console.log(err));
           })
           .catch((err) => console.log(err));
+      } else {
+        this.$swal(
+          "Error",
+          "Nilai Harga tidak boleh lebih kecil dari nilai Harga Penawaran Terbesar",
+          "error"
+        );
       }
     },
   },
